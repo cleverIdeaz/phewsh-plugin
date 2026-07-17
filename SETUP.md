@@ -31,10 +31,14 @@ This plugin ships **disabled by default** because it connects to an external
 service — you opt in.
 
 ```bash
-# from a marketplace (once published):
-claude plugin install phewsh@<marketplace>
+# add this repo as a marketplace, then install + enable the plugin:
+claude plugin marketplace add cleverIdeaz/phewsh-plugin
+claude plugin install phewsh@phewsh
 claude plugin enable phewsh
 ```
+
+> **Developer preview.** This is a self-hosted marketplace, not the curated
+> Claude Connectors Directory. Update later with `claude plugin marketplace update phewsh`.
 
 On enable, Claude Code prompts for your **Phewsh API key**. Paste the key from
 step 1. It's stored in your OS keychain (never written to a settings file) and
