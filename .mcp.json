@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "phewsh": {
+      "type": "http",
+      "url": "https://fpnpfnahwaztdlxuayyv.supabase.co/functions/v1/mcp",
+      "headers": {
+        "Authorization": "Bearer ${user_config.api_key}"
+      }
+    }
+  }
+}

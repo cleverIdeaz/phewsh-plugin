@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "phewsh",
+  "displayName": "Phewsh — continuity layer",
+  "version": "0.1.0",
+  "description": "Keep one project truth across every AI tool. Resume cold, plan from real context, and record what you learned so the next session (or the next model) starts where this one left off.",
+  "author": {
+    "name": "Phewsh",
+    "email": "hello@phewsh.com",
+    "url": "https://phewsh.com"
+  },
+  "homepage": "https://phewsh.com",
+  "repository": "https://github.com/cleverIdeaz/phewsh-plugin",
+  "license": "MIT",
+  "keywords": ["continuity", "handoff", "context", "mcp", "project-memory", "intent"],
+  "defaultEnabled": false,
+  "mcpServers": "./.mcp.json",
+  "userConfig": {
+    "api_key": {
+      "type": "string",
+      "title": "Phewsh API key",
+      "description": "Your phewsh API key from phewsh.com/api. Used as the bearer credential for the Phewsh continuity server. Stored in your OS keychain, never in a settings file.",
+      "sensitive": true,
+      "required": true
+    }
+  }
+}
