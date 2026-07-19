@@ -15,7 +15,8 @@ A focused handoff: one structured record so whoever continues — the next sessi
    - `title` — a scannable one-liner ("Remote MCP slice: deployed, proofs credential-gated").
    - `summary` — three beats: **what happened**, **what was verified** (name the check and its result), **what remains** (unknowns, blocked steps, the honest gaps). A handoff that only lists wins is a bad handoff.
    - `next_steps` — an ordered, actionable list. Prefer commands and file paths over vague intentions.
-   - `idempotency_key` — a stable slug so re-running updates the same handoff instead of duplicating it.
+   - `idempotency_key` — a unique stable slug for this exact handoff. Reusing it replays the
+     original result and prevents a duplicate; it does not update the stored handoff.
    - `expected_revision` — optional; if you read the context first, pass its `revision` to catch a concurrent write (you'll get a structured `revision_conflict` instead of clobbering).
 4. **Confirm.** Tell the user the handoff is recorded and where it lives (it's readable from any phewsh-connected tool and at phewsh.com).
 
@@ -23,4 +24,5 @@ A focused handoff: one structured record so whoever continues — the next sessi
 
 - Verified over asserted: "247/247 tests pass (ran `npm test`)" beats "tests pass".
 - Name what's unknown. The next reader's first question is usually "what's *not* done?"
-- Provenance is automatic — the server records which tool/model wrote this. You don't set it.
+- Claimed provenance is automatic — the server records provider/client/session signals
+  from the transport. Treat that as an origin hint, not proof of model identity.

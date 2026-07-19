@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "evaluated_at": "2026-07-19",
+  "local_packet": {
+    "status": "ready",
+    "validator": "node plugin/validate-submission.mjs",
+    "visible_product_proof": "/intent/app",
+    "visible_product_proof_deployed": true,
+    "custom_mcp_ui": false,
+    "mcp_scoped_credential_built_and_tested": true
+  },
+  "distribution": {
+    "self_hosted_claude_code": "release_candidate_ready_for_public_sync",
+    "anthropic_plugin_directory": "security_and_human_gates",
+    "claude_custom_connector": "external_gate",
+    "anthropic_connectors_directory": "external_and_human_gates",
+    "openai_plugin_with_mcp": "external_and_human_gates"
+  },
+  "production": {
+    "target_mcp_url": "https://mcp.phewsh.com",
+    "mcp_url_deployed_and_resolving": false,
+    "direct_mcp_tool_metadata_deployed_and_probed": true,
+    "origin_rejection_deployed_and_probed": true,
+    "browser_origin_allowlist_deployed_and_probed": false,
+    "mcp_scoped_credential_enforced": true,
+    "legacy_bearer_key_preserved": true,
+    "retention_policy_finalized_and_deployed": false,
+    "corrected_policy_pages_deployed": true,
+    "workspace_signed_in_live_proof": true,
+    "public_plugin_repo_synced_to_0_1_1": false,
+    "oauth_browser_proof": false,
+    "oauth_audience_scope_refresh_revoke_proof": false,
+    "two_user_oauth_isolation": false,
+    "claude_custom_connector_every_tool_proof": false,
+    "openai_developer_mode_web_proof": false,
+    "openai_developer_mode_mobile_proof": false,
+    "fresh_second_provider_continuity_proof": false
+  },
+  "human_gates": {
+    "reviewer_account_seeded": false,
+    "openai_publisher_identity_verified": false,
+    "openai_apps_management_permission": false,
+    "openai_domain_challenge_completed": false,
+    "anthropic_directory_role_confirmed": false,
+    "provider_attestations_completed": false,
+    "official_submission_sent": false
+  },
+  "public_urls": {
+    "website": "https://phewsh.com",
+    "documentation": "https://phewsh.com/platform",
+    "privacy": "https://phewsh.com/privacy.html",
+    "terms": "https://phewsh.com/terms.html",
+    "support": "https://github.com/cleverIdeaz/phewsh-plugin/issues"
+  }
+}

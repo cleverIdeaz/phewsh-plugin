@@ -10,11 +10,18 @@ no analytics, no telemetry of its own.
 
 ## Your credential
 - On enable, Claude Code prompts for your **Phewsh API key** (from phewsh.com/api).
-- It is stored by Claude Code in your **OS keychain** (or `~/.claude/.credentials.json`
-  where no keychain exists) as a `sensitive` value — **never** written to a settings file,
-  never committed, never printed by the plugin.
+- It is stored by Claude Code as a `sensitive` value in its host credential store: normally
+  the **OS keychain**, or `~/.claude/.credentials.json` where no keychain exists. The plugin
+  never writes it to project settings or Git and never prints it.
 - It is sent only to the Phewsh MCP endpoint, only as an `Authorization: Bearer` header,
   only over HTTPS.
+- The 0.1.1 candidate supports an independently revocable **MCP-only** key with a label,
+  optional expiry, and last-use timestamp. The continuity server accepts `mcp` keys; the
+  paid generation gateway accepts `gateway` keys; existing `legacy_all` keys remain
+  backward-compatible until rotated, but no new broad key can be created or promoted after
+  migration. The public service still has the older account-wide
+  issuer until this migration and both enforcement paths are deployed and probed. Do not
+  treat the local code as production enforcement or use a broad preview key for review.
 
 ## What data moves, and where
 When a skill calls an MCP tool, the request goes to
@@ -24,14 +31,17 @@ When a skill calls an MCP tool, the request goes to
   to record,
 - a **revision cursor** and **idempotency key**.
 
-The server records **provenance** (which tool/model/session made the call) with each write.
+The server records **claimed provenance** (provider/client/session signals supplied by the
+transport or caller) with each write. This helps explain where a record came from, but is
+not proof of model identity or authorship.
 It does **not** receive your source code, your terminal transcript, your editor buffers, or
 files you didn't pass into a tool call.
 
 ## What the server stores
 Your project record: intent artifacts, decisions, handoffs, and an append-only event ledger
-— the same data visible at phewsh.com when you sign in. Reads and writes are scoped by
-membership (row-level security): the plugin can only reach projects you own or were invited
+— the same data visible at phewsh.com when you sign in. The MCP service uses explicit
+service-side membership checks and security-definer writes; direct user reads are also
+protected by row-level security. The plugin can only reach projects you own or were invited
 to. AI-authored writes are always recorded as `proposed`/`observed` — never as
 `human_approved` or `repo_verified`.
 
@@ -44,11 +54,23 @@ to. AI-authored writes are always recorded as `proposed`/`observed` — never as
 ## Your control
 - **Disable** the plugin any time: `claude plugin disable phewsh` (stops all calls).
 - **Rotate/revoke** your key at phewsh.com/api.
-- **Delete** project data from phewsh.com.
-- Removing the plugin removes the key from Claude Code's secure storage.
+- **Request deletion** of cloud project/account data through phewsh.com or
+  hello@phewsh.com.
+- Remove or rotate the saved credential through Claude Code's credential controls and
+  Phewsh's API-key controls. Disabling the plugin stops calls but should not be treated as
+  proof that the host deleted a stored credential.
 
 ## Auth roadmap
-The preview uses bearer auth (your API key). OAuth 2.1 + dynamic client registration is next
-and will replace the pasted key with a browser sign-in + revocable grant.
+The preview uses bearer auth (your API key). OAuth 2.1 browser sign-in is planned to replace
+the pasted key with a revocable grant. The compatible client-registration method (DCR,
+CIMD, or a pre-registered client) remains unchosen until the real browser proof.
+
+## Retention status
+
+Project records and claimed provenance are retained while the cloud project/account is
+active. Account/project deletion is currently request-based. The exact operational timing
+for deletion from primary storage and backups, generation-usage records, and inactive
+one-way key-hash rows is not yet published; official directory submission remains gated on
+finalizing and deploying that retention schedule. Raw API keys are never stored server-side.
 
 Questions or data requests: **hello@phewsh.com**.

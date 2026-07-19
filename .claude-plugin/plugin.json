@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "phewsh",
   "displayName": "Phewsh — continuity layer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Keep one project truth across every AI tool. Resume cold, plan from real context, and record what you learned so the next session (or the next model) starts where this one left off.",
   "author": {
     "name": "Phewsh",
@@ -19,7 +19,7 @@
     "api_key": {
       "type": "string",
       "title": "Phewsh API key",
-      "description": "Your phewsh API key from phewsh.com/api. Used as the bearer credential for the Phewsh continuity server. Stored in your OS keychain, never in a settings file.",
+      "description": "Your account-wide Phewsh API key from phewsh.com/api. Used as the bearer credential for the continuity server; the preview key can also authorize the Phewsh generation gateway. Claude Code stores sensitive values in its host credential store (normally the OS keychain, with a credentials-file fallback).",
       "sensitive": true,
       "required": true
     }

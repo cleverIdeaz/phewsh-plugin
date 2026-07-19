@@ -1,7 +1,7 @@
 {
   "name": "phewsh",
   "description": "Phewsh continuity-layer plugins for Claude Code — keep one project truth across every AI tool.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "owner": {
     "name": "Phewsh",
     "email": "hello@phewsh.com",
@@ -12,7 +12,7 @@
       "name": "phewsh",
       "source": "./",
       "description": "Continuity layer for Claude Code — resume cold, plan from context, record decisions, and hand off cleanly across AI tools. Developer preview (bearer auth).",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": { "name": "Phewsh", "url": "https://phewsh.com" }
     }
   ]

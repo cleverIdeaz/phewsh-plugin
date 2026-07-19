@@ -16,8 +16,25 @@ commit as a new release).
 
 ## [Unreleased]
 ### Planned
-- OAuth 2.1 + dynamic client registration (replaces the pasted API key with a
-  browser sign-in and a revocable grant). Tracked in the main repo's OAuth slice.
+- OAuth 2.1 browser sign-in (replaces the pasted API key with a revocable grant). The
+  compatible registration method remains open until the real browser proof. Tracked in the
+  main repo's OAuth slice.
+
+## [0.1.1] — 2026-07-19 — truthful submission packet
+### Changed
+- Corrected public/self-hosted marketplace status and claimed-provenance wording.
+- Added the copy-ready OpenAI and Anthropic submission packet with explicit production
+  and human gates.
+- Added exact tool annotation justifications, five positive tests, three negative tests,
+  reviewer-fixture instructions, and a local submission validator.
+- Aligned plugin privacy language with the public Phewsh policy.
+- Added the deployment candidate for labeled, optionally expiring, independently revocable
+  MCP-only credentials. The production migration, gateway/MCP enforcement, expiry,
+  revocation, last-use tracking, and legacy-key preservation were live-probed before tag.
+- Published the signed-in `/intent/app` Workspace as the visible Project · Next · Work ·
+  Record proof, backed by the real coordination ledger rather than sample activity.
+- Hardened rejected MCP browser Origins so 403 responses do not reflect an
+  `Access-Control-Allow-Origin` value.
 
 ## [0.1.0] — 2026-07-17 — developer preview
 ### Added
@@ -29,5 +46,5 @@ commit as a new release).
 - SETUP.md, README.md, PRIVACY.md, LICENSE (MIT).
 
 ### Status
-Developer preview on bearer auth. Not yet in a public marketplace. `claude plugin
-validate --strict` passes.
+Developer preview on bearer auth. The package is distributed from Phewsh's self-hosted
+public Git marketplace; no official provider directory approval is implied.

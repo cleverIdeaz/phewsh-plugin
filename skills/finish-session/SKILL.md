@@ -18,9 +18,12 @@ Close the loop so the next session — or the next tool — doesn't start cold. 
    - `title` — a one-line "where we are".
    - `summary` — what happened, **what you verified** (with the evidence), and what remains unknown or unfinished. Be honest about failures and skipped steps.
    - `next_steps` — an ordered list the next session can act on.
-   - an `idempotency_key` so re-running finish-session updates rather than duplicates.
+   - a unique `idempotency_key` for this exact handoff. Reusing it replays the original
+     result and prevents a duplicate; it does not update the stored handoff.
 4. **Tell the user, plainly.** Report what you recorded and handed off in one or two sentences, so they can see the continuity layer working.
 
 ## Why this exists
 
-*Will the next AI know what the last one learned?* This skill is how you make the answer yes: the decision record and the handoff are the memory that survives the session boundary and travels across tools.
+*Will the next AI know what the last one learned?* This skill makes the durable part of
+the answer yes: the recorded decision and handoff survive the session boundary and travel
+across tools. Private model memory and reasoning do not transfer.
