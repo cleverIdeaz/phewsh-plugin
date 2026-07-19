@@ -10,7 +10,7 @@
     "mcp_scoped_credential_built_and_tested": true
   },
   "distribution": {
-    "self_hosted_claude_code": "release_candidate_ready_for_public_sync",
+    "self_hosted_claude_code": "public_0_1_1",
     "anthropic_plugin_directory": "security_and_human_gates",
     "claude_custom_connector": "external_gate",
     "anthropic_connectors_directory": "external_and_human_gates",
@@ -27,7 +27,7 @@
     "retention_policy_finalized_and_deployed": false,
     "corrected_policy_pages_deployed": true,
     "workspace_signed_in_live_proof": true,
-    "public_plugin_repo_synced_to_0_1_1": false,
+    "public_plugin_repo_synced_to_0_1_1": true,
     "oauth_browser_proof": false,
     "oauth_audience_scope_refresh_revoke_proof": false,
     "two_user_oauth_isolation": false,

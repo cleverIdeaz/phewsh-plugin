@@ -112,6 +112,7 @@ for (const gate of [
   "legacy_bearer_key_preserved",
   "corrected_policy_pages_deployed",
   "workspace_signed_in_live_proof",
+  "public_plugin_repo_synced_to_0_1_1",
 ]) {
   assert.equal(readiness.production[gate], true, `proven production gate ${gate} must remain recorded`);
 }
@@ -119,7 +120,6 @@ for (const gate of [
   "mcp_url_deployed_and_resolving",
   "browser_origin_allowlist_deployed_and_probed",
   "retention_policy_finalized_and_deployed",
-  "public_plugin_repo_synced_to_0_1_1",
   "oauth_browser_proof",
   "oauth_audience_scope_refresh_revoke_proof",
   "two_user_oauth_isolation",

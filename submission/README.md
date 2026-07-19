@@ -8,8 +8,8 @@ not claim that a provider has reviewed Phewsh, that OAuth works, or that
 
 | Lane | Local package | External state |
 | --- | --- | --- |
-| Self-hosted Claude Code plugin | Public 0.1.0 works today; the 0.1.1 release candidate adds the truthful packet and live-proven MCP-only credential path. | Sync/tag 0.1.1. No provider review is required for self-hosting. |
-| Anthropic Plugin Directory | The open-source package, listing materials, deployed scoped credential path, and reviewer instructions are prepared. | Sync 0.1.1, confirm eligible Claude organization/role, complete security/attestation gates, then submit. |
+| Self-hosted Claude Code plugin | Public 0.1.1 includes the truthful packet and live-proven MCP-only credential path. | No provider review is required for self-hosting. Users still approve the server and provide their own scoped key. |
+| Anthropic Plugin Directory | The open-source 0.1.1 package, listing materials, deployed scoped credential path, and reviewer instructions are prepared. | Confirm eligible Claude organization/role, complete security/attestation gates, then submit. |
 | Claude.ai custom connector | The five-tool remote MCP contract and durable-origin proxy are built. | Deploy `mcp.phewsh.com`, finish OAuth, and test every tool in Claude. |
 | Anthropic Connectors Directory | Copy, tool matrix, fixture, and review instructions are locally prepared in [ANTHROPIC.md](./ANTHROPIC.md). | Production MCP/OAuth, reviewer account, provider attestations, and portal submission remain. |
 | OpenAI plugin with MCP | Copy, prompts, exactly five positive and three negative tests, and annotation justifications are prepared in [OPENAI.md](./OPENAI.md). | Production MCP/OAuth, domain challenge, Developer Mode web/mobile tests, verified identity, reviewer account, and portal submission remain. |
