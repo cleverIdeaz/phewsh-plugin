@@ -1,6 +1,7 @@
 # Changelog
 
-All notable changes to the Phewsh Claude Code plugin. This project uses
+All notable changes to the Phewsh plugin — the Claude Code adapter to Phewsh's
+provider-neutral continuity layer. This project uses
 [semantic versioning](https://semver.org). The `version` in
 `.claude-plugin/plugin.json` is authoritative — Claude Code delivers an update to
 users only when that version is bumped (an unversioned plugin would treat every

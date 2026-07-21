@@ -11,10 +11,14 @@ const json = (path) => JSON.parse(read(path));
 const manifest = json("plugin/.claude-plugin/plugin.json");
 const marketplace = json("plugin/.claude-plugin/marketplace.json");
 const readiness = json("plugin/submission/readiness.json");
+const chatgptSubmission = json("plugin/submission/chatgpt-app-submission.json");
+const originHandoff = read("handoffs/MCP_ORIGIN_DEPLOY_2026-07-19.md");
 const toolsSource = read("intent/app/supabase/functions/mcp/tools.ts");
 const keyPolicy = read("intent/app/supabase/functions/_shared/api-key-policy.ts");
 const keyMigration = read("intent/app/supabase/migrations/20260719010000_scoped_api_keys.sql");
 const mcpAuth = read("intent/app/supabase/functions/mcp/db.ts");
+const mcpToolAnnotations = read("intent/app/supabase/functions/mcp/tool-annotations.ts");
+const mcpIndex = read("intent/app/supabase/functions/mcp/index.ts");
 const gatewayAuth = read("intent/app/supabase/functions/chat-completions/index.ts");
 const apiPage = read("api/index.html");
 const scopedLiveCheck = read("intent/app/supabase/tests/scoped-api-key-live-check.mjs");
@@ -75,9 +79,19 @@ const expectedAnnotations = {
   phewsh_record_decision: { readOnlyHint: false, destructiveHint: true, openWorldHint: false },
   phewsh_create_handoff: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
 };
+assert.equal(
+  chatgptSubmission.$schema,
+  "https://developers.openai.com/apps-sdk/schemas/chatgpt-app-submission.v1.json",
+);
+assert.equal(chatgptSubmission.schema_version, 1);
+assert.equal(chatgptSubmission.app_info.display_name, "Phewsh");
+assert.ok(chatgptSubmission.app_info.subtitle.length <= 30, "ChatGPT subtitle must be at most 30 characters");
+assert.equal(chatgptSubmission.app_info.category, "DEVELOPER_TOOLS");
+assert.deepEqual(Object.keys(chatgptSubmission.tools), expectedTools);
 for (const [index, tool] of expectedTools.entries()) {
   const block = toolBlock(tool, expectedTools[index + 1]);
   assert.match(block, /\btitle: "/, `${tool} is missing a title`);
+  assert.match(block, /\boutputSchema:/, `${tool} is missing an outputSchema`);
   for (const [hint, value] of Object.entries(expectedAnnotations[tool])) {
     assert.match(block, new RegExp(`\\b${hint}: ${value}\\b`), `${tool} has wrong ${hint}`);
   }
@@ -93,6 +107,20 @@ for (const [index, tool] of expectedTools.entries()) {
     },
     `OpenAI annotation row drifted for ${tool}`,
   );
+  assert.deepEqual(
+    chatgptSubmission.tools[tool].annotations,
+    {
+      readOnlyHint: expectedAnnotations[tool].readOnlyHint,
+      openWorldHint: expectedAnnotations[tool].openWorldHint,
+      destructiveHint: expectedAnnotations[tool].destructiveHint,
+    },
+    `ChatGPT import annotations drifted for ${tool}`,
+  );
+  assert.deepEqual(
+    Object.keys(chatgptSubmission.tools[tool].justifications).sort(),
+    ["destructive_justification", "open_world_justification", "read_only_justification"],
+    `ChatGPT import justifications are incomplete for ${tool}`,
+  );
 }
 assert.doesNotMatch(
   toolsSource.match(/phewsh_get_changes_since:[\s\S]*?phewsh_record_decision:/)?.[0] || "",
@@ -101,24 +129,45 @@ assert.doesNotMatch(
 );
 assert.equal((openai.match(/^### Positive \d/gm) || []).length, 5);
 assert.equal((openai.match(/^### Negative \d/gm) || []).length, 3);
+assert.equal(chatgptSubmission.test_cases.length, 5);
+assert.equal(chatgptSubmission.negative_test_cases.length, 3);
+assert.deepEqual(
+  chatgptSubmission.test_cases.map((testCase) => testCase.tools_triggered),
+  expectedTools,
+  "ChatGPT positive tests must cover each exact MCP tool once",
+);
+for (const testCase of chatgptSubmission.test_cases) {
+  assert.equal(testCase.file_attachment_urls, null);
+  assert.equal(testCase.expected_output_url, null);
+}
+for (const testCase of chatgptSubmission.negative_test_cases) {
+  assert.equal(testCase.tools_triggered, null, "ChatGPT negative tests must not trigger Phewsh");
+  assert.equal(testCase.file_attachment_urls, null);
+  assert.equal(testCase.expected_output_url, null);
+}
 assert.equal(readiness.local_packet.status, "ready");
+assert.equal(readiness.local_packet.chatgpt_submission_import, "plugin/submission/chatgpt-app-submission.json");
+assert.equal(readiness.local_packet.chatgpt_submission_import_generated, true);
 assert.equal(readiness.local_packet.custom_mcp_ui, false);
 assert.equal(readiness.local_packet.mcp_scoped_credential_built_and_tested, true);
 assert.equal(readiness.local_packet.visible_product_proof_deployed, true);
 for (const gate of [
   "direct_mcp_tool_metadata_deployed_and_probed",
+  "mcp_url_deployed_and_resolving",
+  "oauth_metadata_discovery_deployed_and_probed",
   "origin_rejection_deployed_and_probed",
   "mcp_scoped_credential_enforced",
   "legacy_bearer_key_preserved",
   "corrected_policy_pages_deployed",
   "workspace_signed_in_live_proof",
   "public_plugin_repo_synced_to_0_1_1",
+  "mcp_inspector_bearer_every_tool_proof",
+  "inspector_browser_origin_allowlist_deployed_and_probed",
 ]) {
   assert.equal(readiness.production[gate], true, `proven production gate ${gate} must remain recorded`);
 }
 for (const gate of [
-  "mcp_url_deployed_and_resolving",
-  "browser_origin_allowlist_deployed_and_probed",
+  "provider_browser_origin_allowlist_deployed_and_probed",
   "retention_policy_finalized_and_deployed",
   "oauth_browser_proof",
   "oauth_audience_scope_refresh_revoke_proof",
@@ -134,6 +183,31 @@ for (const [gate, value] of Object.entries(readiness.human_gates)) {
   assert.equal(value, false, `human gate ${gate} must remain explicitly false until completed`);
 }
 assert.equal(readiness.production.target_mcp_url, "https://mcp.phewsh.com");
+const originEvidence = readiness.production_evidence.canonical_mcp_origin;
+assert.equal(originEvidence.url, readiness.production.target_mcp_url);
+assert.match(originEvidence.probed_at, /^2026-07-19/);
+assert.match(originEvidence.source_commit, /^[0-9a-f]{40}$/);
+assert.equal(originEvidence.netlify_site_id, "ecaf343a-81ed-4e58-8941-14207fca6fc5");
+assert.equal(originEvidence.netlify_deploy_id, "6a5d7ef2b4833c6e38284fab");
+assert.equal(originEvidence.previous_netlify_deploy_id, "6a5d188ced3dbdcdf236a9fa");
+assert.equal(originEvidence.supabase_mcp_function_version, 7);
+assert.equal(originEvidence.handoff, "handoffs/MCP_ORIGIN_DEPLOY_2026-07-19.md");
+assert.deepEqual(originEvidence.checks, {
+  public_contract: "6/6",
+  canonical_continuity: "12/12",
+  scoped_key_authority: "10/10",
+  inspector_bearer_every_tool: "6/6",
+  inspector_origin_cors: "8/8",
+});
+for (const value of [
+  originEvidence.source_commit,
+  originEvidence.netlify_site_id,
+  originEvidence.netlify_deploy_id,
+  originEvidence.previous_netlify_deploy_id,
+  originEvidence.url,
+]) {
+  assert.ok(originHandoff.includes(value), `canonical-origin handoff is missing evidence ${value}`);
+}
 
 for (const [name, url] of Object.entries(readiness.public_urls)) {
   assert.match(url, /^https:\/\//, `${name} must be HTTPS`);
@@ -151,6 +225,12 @@ assert.match(keyMigration, /CREATE TRIGGER api_keys_guard_legacy_purpose/);
 assert.match(keyMigration, /CREATE OR REPLACE FUNCTION rotate_scoped_api_key/);
 assert.match(keyMigration, /SECURITY DEFINER/);
 assert.match(mcpAuth, /apiKeyAllows\(keyRow, "mcp"\)/);
+assert.match(mcpAuth, /authKind: "api_key"/);
+assert.match(mcpAuth, /authKind: "supabase_jwt"/);
+assert.match(mcpToolAnnotations, /authKind === "api_key" && annotations\.readOnlyHint/);
+assert.match(mcpIndex, /toolList\(principal\.authKind\)/);
+assert.match(toolsSource, /outputSchema: def\.outputSchema/, "tools/list must expose each tool outputSchema");
+assert.match(openai, /OAuth\/JWT submission path/);
 assert.match(gatewayAuth, /apiKeyAllows\(keyRow, "gateway"\)/);
 assert.match(apiPage, /Phewsh MCP Connector Key/);
 assert.match(apiPage, /purpose: 'mcp'/);
@@ -163,4 +243,5 @@ assert.doesNotMatch(pluginDocs, /OAuth 2\.1 \+ dynamic client registration is ne
 
 console.log("PASS plugin submission packet");
 console.log(`PASS ${skills.length} skills · ${expectedTools.length} tools · 5 positive + 3 negative tests`);
+console.log("PASS all 5 tools declare outputSchema for successful structured results");
 console.log("PASS unresolved production and human gates remain explicit");

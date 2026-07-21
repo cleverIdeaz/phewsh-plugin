@@ -1,11 +1,14 @@
-# Phewsh — continuity layer for Claude Code
+# Phewsh — one project truth across Claude Code, Codex, and every AI tool
 
-Keep one project truth across every AI tool. This plugin connects Claude Code to
-your Phewsh record so a session can **resume cold, plan from real context, and
-record what it learned** — and the next tool (Codex, the CLI, Ion) inherits it.
+Keep one project truth across every AI tool. Phewsh is the continuity layer above
+Claude Code, Codex, Cursor, Gemini, and more; **this package is its Claude Code
+adapter.** It connects Claude Code to your Phewsh record so a session can
+**resume cold, plan from real context, and record what it learned** — and the
+next tool (Codex, the CLI, Ion) inherits it from the same record.
 
-**Will the next AI know what the last one learned?** This plugin is how the answer
-becomes yes inside Claude Code.
+**Will the next AI know what the last one learned?** This adapter is how the
+answer becomes yes when the tool is Claude Code; the matching adapters do it for
+Codex and the rest.
 
 ## Install
 
@@ -38,7 +41,7 @@ The MCP server exposes five tools: `phewsh_list_projects`,
 - **Host-controlled key handling.** Claude Code marks the value sensitive and normally
   uses the OS keychain; on hosts without one it may fall back to
   `~/.claude/.credentials.json`. The plugin never puts it in project settings or Git.
-- **Scoped connector credential.** The 0.1.1 release candidate adds MCP-only, independently
+- **Scoped connector credential.** The public 0.1.1 release adds MCP-only, independently
   revocable keys with labels, optional expiry, and last-use metadata. An MCP key is rejected
   by the paid generation gateway, and no new broad key can be minted. The migration,
   gateway/MCP enforcement, `/api` issuer, expiry, revocation, and last-use behavior are
@@ -48,14 +51,16 @@ The MCP server exposes five tools: `phewsh_list_projects`,
 ## Auth roadmap
 
 Bearer (API key / JWT) today. Production OAuth 2.1 browser sign-in is the prerequisite for
-the ChatGPT and Claude connector-directory surfaces. The compatible client-registration
-path (DCR, CIMD, or a pre-registered client) remains a proof-time decision, not a promise.
+the ChatGPT and Claude connector-directory surfaces. A manually registered public Inspector
+client and its exact browser Origin exist, while the authorize/consent/PKCE/token,
+audience/refresh/revoke, and provider-runtime proofs remain open. DCR is off.
 
 ## Status
 
-**Public self-hosted developer preview**, bearer auth. It is installable from the Phewsh
-Git marketplace, but has not been submitted to Anthropic's Plugin Directory or Connectors
-Directory. `claude plugin validate --strict` passes.
+**Public self-hosted developer preview**, bearer auth. Installable from the Phewsh
+Git marketplace and **submitted to Anthropic's Plugin Directory (pending review)**.
+Not yet submitted to the Connectors Directory, which requires production OAuth.
+`claude plugin validate --strict` passes.
 
 ## More
 

@@ -21,7 +21,8 @@ after they are validated in OpenAI's plugin runtime as a separate version or pac
 - **Logo source:** `assets/PhewshYinYang.png`
 - **Category:** choose the closest available Developer Tools or Productivity category in
   the live portal; this is a human selection, not a repository claim.
-- **MCP URL:** `https://mcp.phewsh.com` only after its production gate passes.
+- **MCP URL:** `https://mcp.phewsh.com` — the production origin/discovery gate passed;
+  do not submit until OAuth, audience, provider-Origin, and Developer Mode gates pass.
 - **CSP:** no custom UI is shipped. Enter the portal's required exact policy for a
   tool-only app after scanning the production endpoint; do not invent fetch domains.
 
@@ -44,6 +45,12 @@ after they are validated in OpenAI's plugin runtime as a separate version or pac
 | `phewsh_get_changes_since` | true | false | false | Reads ordered membership-scoped ledger events only. |
 | `phewsh_record_decision` | false | false | true | Adds a private project decision/event. When `supersedes_id` is supplied it also changes the prior decision's durable status to superseded, so the tool is conservatively destructive. It never publishes externally. |
 | `phewsh_create_handoff` | false | false | false | Adds a private proposed handoff/event. It does not message third parties, execute work, supersede prior records, or publish externally. |
+
+These annotations describe the OAuth/JWT submission path. The public Claude Code
+plugin also accepts MCP-only API keys and records `last_used_at` after a successful
+key authentication; for that compatibility path the live `tools/list` response
+conservatively marks the three reader tools non-read-only. The OpenAI artifact does
+not hide that distinction or claim API-key reads are mutation-free.
 
 OAuth `securitySchemes` are intentionally absent from the current deployed metadata. Add
 and scan them only after the OAuth acceptance gate is complete.
@@ -149,7 +156,7 @@ provenance. There is no custom UI, code execution, desktop control, or public in
 
 - verified publisher identity and Apps Management write permission in the same global-data
   residency organization/project;
-- production endpoint deploy, domain challenge, OAuth callback/configuration, and tool scan;
+- domain challenge, OAuth callback/configuration, audience/provider-Origin acceptance, and tool scan;
 - reviewer credentials entered only in the portal;
 - all eight cases re-run in Developer Mode on ChatGPT web and mobile;
 - final region/category choices, policy attestations, review submission, and later publish.

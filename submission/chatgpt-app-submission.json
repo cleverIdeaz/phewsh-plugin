@@ -1,0 +1,140 @@
+{
+  "$schema": "https://developers.openai.com/apps-sdk/schemas/chatgpt-app-submission.v1.json",
+  "schema_version": 1,
+  "app_info": {
+    "display_name": "Phewsh",
+    "subtitle": "Keep project truth aligned",
+    "description": "Phewsh lets people and AI tools resume from the same membership-scoped project record. It lists projects, loads a bounded Project · Next · Work · Record snapshot, reads the ordered change ledger, and records proposed decisions or handoffs with provenance and revision checks.",
+    "category": "DEVELOPER_TOOLS"
+  },
+  "tools": {
+    "phewsh_list_projects": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only lists metadata for projects the signed-in user owns or belongs to.",
+        "open_world_justification": "Reads private Phewsh project records and does not change public or third-party systems.",
+        "destructive_justification": "Does not create, update, delete, supersede, or revoke any record."
+      }
+    },
+    "phewsh_get_active_context": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves a bounded membership-scoped project snapshot and freshness cursor.",
+        "open_world_justification": "Reads private Phewsh project records and does not change public or third-party systems.",
+        "destructive_justification": "Does not create, update, delete, supersede, or revoke any record."
+      }
+    },
+    "phewsh_get_changes_since": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves ordered ledger events after a caller-provided project revision.",
+        "open_world_justification": "Reads a private Phewsh ledger and does not change public or third-party systems.",
+        "destructive_justification": "Does not create, update, delete, supersede, or revoke any record."
+      }
+    },
+    "phewsh_record_decision": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Creates a private proposed or observed decision and its append-only project event.",
+        "open_world_justification": "Changes only the signed-in user's private Phewsh project record and never publishes externally.",
+        "destructive_justification": "When supersedes_id is supplied, it changes the prior decision's durable status to superseded."
+      }
+    },
+    "phewsh_create_handoff": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates a private proposed handoff and its append-only project event.",
+        "open_world_justification": "Changes only the signed-in user's private Phewsh project record and never messages or publishes externally.",
+        "destructive_justification": "Adds a new handoff without deleting, overwriting, superseding, or revoking an existing record."
+      }
+    }
+  },
+  "test_cases": [
+    {
+      "description": "List the signed-in user's available continuity projects.",
+      "user_prompt": "List my Phewsh projects and tell me which one changed most recently.",
+      "file_attachment_urls": null,
+      "tools_triggered": "phewsh_list_projects",
+      "expected_output": "Returns only the user's membership-scoped projects with role, revision, and update time, then identifies the most recently updated project.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Load a bounded project snapshot while preserving verification labels.",
+      "user_prompt": "Load the active context for Phewsh Reviewer Demo and separate recorded facts from proposed items.",
+      "file_attachment_urls": null,
+      "tools_triggered": "phewsh_get_active_context",
+      "expected_output": "Returns Project, Next, Work, and Record data with freshness, revision, and verification labels without presenting cloud claims as repository proof.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Read ordered project changes after a known revision.",
+      "user_prompt": "Show what changed in Phewsh Reviewer Demo after revision 0.",
+      "file_attachment_urls": null,
+      "tools_triggered": "phewsh_get_changes_since",
+      "expected_output": "Returns ordered ledger events, the latest revision, and whether another page remains while treating provenance labels as claimed.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Record a bounded proposed project decision.",
+      "user_prompt": "Record this as a proposed decision in Phewsh Reviewer Demo: keep desktop dispatch outside the current release.",
+      "file_attachment_urls": null,
+      "tools_triggered": "phewsh_record_decision",
+      "expected_output": "Creates one proposed decision with a new revision and does not claim human approval or repository verification.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Create a resumable proposed project handoff.",
+      "user_prompt": "Create a Phewsh Reviewer Demo handoff saying the Workspace proof is complete and the next steps are OAuth acceptance and provider review.",
+      "file_attachment_urls": null,
+      "tools_triggered": "phewsh_create_handoff",
+      "expected_output": "Creates one proposed handoff with the summary, two next steps, claimed provenance, and a new project revision.",
+      "expected_output_url": null
+    }
+  ],
+  "negative_test_cases": [
+    {
+      "description": "Do not invoke Phewsh to operate a code repository.",
+      "user_prompt": "Run my test suite, fix any failures, and push the branch.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "Phewsh should not be invoked because it records continuity and cannot execute code or push repositories.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not invoke Phewsh for unrelated calendar management.",
+      "user_prompt": "Move tomorrow's team meeting to Friday afternoon.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "Phewsh should not be invoked because it does not read or modify calendars.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not invoke Phewsh to send external communications.",
+      "user_prompt": "Email the launch announcement to our customer list.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "Phewsh should not be invoked because it cannot send messages or publish content.",
+      "expected_output_url": null
+    }
+  ]
+}

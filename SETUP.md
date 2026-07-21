@@ -1,9 +1,9 @@
 # Phewsh plugin — setup
 
-The Phewsh continuity layer for Claude Code. It connects Claude Code to your
-Phewsh project record so you can **resume cold, plan from real context, and hand
-off what you learned** — and so the next tool (Codex, the CLI, Ion) starts from
-the same page.
+The Claude Code adapter for Phewsh — the continuity layer above Claude Code,
+Codex, Cursor, Gemini, and more. It connects Claude Code to your Phewsh project
+record so you can **resume cold, plan from real context, and hand off what you
+learned** — and so the next tool (Codex, the CLI, Ion) starts from the same page.
 
 > One question drives all of it: *will the next AI know what the last one learned?*
 
@@ -45,6 +45,14 @@ claude plugin enable phewsh
 
 > **Developer preview.** This is a self-hosted marketplace, not the curated
 > Claude Connectors Directory. Update later with `claude plugin marketplace update phewsh`.
+
+> **Using a different tool?** This package is the Claude Code adapter, but the
+> record is provider-neutral. Any MCP-capable client — ChatGPT (Developer Mode),
+> Claude.ai connectors, Cursor, MCP Inspector — connects to the same
+> `https://mcp.phewsh.com` with a Phewsh API key. In the terminal, the
+> [phewsh CLI](https://github.com/cleverIdeaz/phewsh-cli) routes Codex, Cursor,
+> Gemini, and others (`phewsh codex`, `phewsh cursor`, …) through the same
+> project truth. One record, many adapters.
 
 On enable, Claude Code prompts for your **Phewsh API key**. Paste the key from step 1.
 Claude Code marks it sensitive and normally stores it in the OS keychain; on hosts without

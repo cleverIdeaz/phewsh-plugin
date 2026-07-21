@@ -3,10 +3,14 @@
 Developer preview. This explains exactly what the plugin sends, stores, and never touches.
 
 ## What the plugin is
-A thin client. All logic lives in Phewsh Cloud (a Supabase-backed remote MCP server) and
-the [phewsh CLI](https://github.com/cleverIdeaz/phewsh-cli). This package contains only:
-markdown skills, an MCP server URL, and a place to hold your API key. No business logic,
-no analytics, no telemetry of its own.
+A thin client — the **Claude Code adapter** to Phewsh's provider-neutral continuity
+layer (the same record other tools reach via ChatGPT, Claude.ai connectors, Cursor, or
+the [phewsh CLI](https://github.com/cleverIdeaz/phewsh-cli) for Codex, Gemini, and more).
+All logic lives in Phewsh Cloud (a Supabase-backed remote MCP server) and the CLI. This
+package contains only: markdown skills, an MCP server URL, and a place to hold your API
+key. No business logic, no analytics, no telemetry of its own. The credential handling
+described below is how Claude Code, this adapter's host, stores the key; other adapters
+use their own host's credential store.
 
 ## Your credential
 - On enable, Claude Code prompts for your **Phewsh API key** (from phewsh.com/api).

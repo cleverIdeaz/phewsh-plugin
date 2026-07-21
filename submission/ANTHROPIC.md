@@ -14,8 +14,9 @@ Connectors Directory. Do not describe one approval as approval of the other.
 - **License:** MIT
 - **Validation:** run `claude plugin validate --strict plugin` on the final synced tree,
   then install from the public repository and exercise all five skills/tools.
-- **External gate:** sync this branch's final `plugin/` package to the public repository,
-  confirm the eligible Claude organization/Console role, and submit the public repo.
+- **External gate:** the public 0.1.1 package is synced. Confirm the eligible Claude
+  organization/Console role, complete current security/attestation requirements, and
+  submit the immutable public release through the provider portal.
 
 ## Connectors Directory listing
 
@@ -35,8 +36,9 @@ Connectors Directory. Do not describe one approval as approval of the other.
 - **Read/write class:** three read tools, one non-destructive private handoff write, and one
   private decision write marked destructive because its optional supersede mode changes a
   prior decision's durable status.
-- **Target URL / transport:** `https://mcp.phewsh.com`, Streamable HTTP — submit only after
-  production verification.
+- **Target URL / transport:** `https://mcp.phewsh.com`, Streamable HTTP — production DNS/TLS
+  and bearer-mode Inspector every-tool acceptance passed; submit only after browser OAuth,
+  provider-Origin, and Claude every-tool acceptance pass.
 - **Authentication:** OAuth 2.1 — select the real deployed registration method after the
   browser proof (DCR, CIMD, or coordinated static client); do not claim one in advance.
 - **Documentation:** `https://phewsh.com/platform`
@@ -66,9 +68,10 @@ under 64 characters and all five local definitions now include titles. Verify th
 8. Attempt a non-member project read, a `human_approved` AI write, and a stale-revision
    write; confirm the three safe failures documented in [OPENAI.md](./OPENAI.md).
 
-Before the directory form is submitted, personally run every tool both in MCP Inspector
-and through Claude's custom-connector runtime. Record the dated results in the durable
-handoff; do not replace this with static unit-test evidence.
+Bearer-mode every-tool acceptance in MCP Inspector 1.0.0 is recorded. Before the directory
+form is submitted, personally repeat the flow with browser OAuth and run every tool through
+Claude's custom-connector runtime. Record the dated results in the durable handoff; do not
+replace this with static unit-test evidence.
 
 ## Data-handling declarations
 
@@ -84,8 +87,8 @@ handoff; do not replace this with static unit-test evidence.
 ## Human portal gates
 
 - Team/Enterprise organization and directory-management permission;
-- production DNS/TLS, OAuth, every-tool Inspector/custom-connector proof, and populated
-  reviewer account;
+- browser OAuth, provider-Origin/audience acceptance, Claude custom-connector proof, and a
+  populated reviewer account;
 - final slug, categories, review contact, owned-domain/API declarations, and all current
   policy acknowledgments;
 - portal submission and response to provider review.

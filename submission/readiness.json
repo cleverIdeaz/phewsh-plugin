@@ -4,6 +4,8 @@
   "local_packet": {
     "status": "ready",
     "validator": "node plugin/validate-submission.mjs",
+    "chatgpt_submission_import": "plugin/submission/chatgpt-app-submission.json",
+    "chatgpt_submission_import_generated": true,
     "visible_product_proof": "/intent/app",
     "visible_product_proof_deployed": true,
     "custom_mcp_ui": false,
@@ -18,16 +20,19 @@
   },
   "production": {
     "target_mcp_url": "https://mcp.phewsh.com",
-    "mcp_url_deployed_and_resolving": false,
+    "mcp_url_deployed_and_resolving": true,
+    "oauth_metadata_discovery_deployed_and_probed": true,
     "direct_mcp_tool_metadata_deployed_and_probed": true,
     "origin_rejection_deployed_and_probed": true,
-    "browser_origin_allowlist_deployed_and_probed": false,
+    "inspector_browser_origin_allowlist_deployed_and_probed": true,
+    "provider_browser_origin_allowlist_deployed_and_probed": false,
     "mcp_scoped_credential_enforced": true,
     "legacy_bearer_key_preserved": true,
     "retention_policy_finalized_and_deployed": false,
     "corrected_policy_pages_deployed": true,
     "workspace_signed_in_live_proof": true,
     "public_plugin_repo_synced_to_0_1_1": true,
+    "mcp_inspector_bearer_every_tool_proof": true,
     "oauth_browser_proof": false,
     "oauth_audience_scope_refresh_revoke_proof": false,
     "two_user_oauth_isolation": false,
@@ -35,6 +40,37 @@
     "openai_developer_mode_web_proof": false,
     "openai_developer_mode_mobile_proof": false,
     "fresh_second_provider_continuity_proof": false
+  },
+  "production_evidence": {
+    "canonical_mcp_origin": {
+      "url": "https://mcp.phewsh.com",
+      "probed_at": "2026-07-19",
+      "source_commit": "42ca0b742f94a2aa753c42bc77e9fe4dc947eb15",
+      "netlify_site_id": "ecaf343a-81ed-4e58-8941-14207fca6fc5",
+      "netlify_deploy_id": "6a5d7ef2b4833c6e38284fab",
+      "previous_netlify_deploy_id": "6a5d188ced3dbdcdf236a9fa",
+      "supabase_mcp_function_version": 7,
+      "handoff": "handoffs/MCP_ORIGIN_DEPLOY_2026-07-19.md",
+      "checks": {
+        "public_contract": "6/6",
+        "canonical_continuity": "12/12",
+        "scoped_key_authority": "10/10",
+        "inspector_bearer_every_tool": "6/6",
+        "inspector_origin_cors": "8/8"
+      }
+    },
+    "mcp_tool_contract": {
+      "source_commit": "a8247b7e681a367ae2f9e4173f4ade0204c78d31",
+      "deployed_at": "2026-07-19",
+      "deployed_via": "Supabase Edge Function mcp",
+      "current_deployed_function_version": 7,
+      "checks": {
+        "canonical_mcp_acceptance": "12/12",
+        "descriptor_output_schemas_and_jwt_hints": "4/4",
+        "workspace_continuity": "6/6"
+      },
+      "rollback_source_commit": "d4cb97999e78d1d371bad05fd7ab79be15b660c0"
+    }
   },
   "human_gates": {
     "reviewer_account_seeded": false,
