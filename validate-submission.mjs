@@ -1,35 +1,29 @@
 import assert from "node:assert/strict";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+// This validator runs in two homes: the phewsh monorepo (plugin/ subdir) and
+// the public cleverIdeaz/phewsh-plugin mirror (repo root). Plugin-packet checks
+// always run; checks that read monorepo server source / site pages / handoffs
+// run only when those files exist (i.e. in the monorepo).
 const pluginDir = dirname(fileURLToPath(import.meta.url));
-const root = resolve(pluginDir, "..");
-const read = (path) => readFileSync(resolve(root, path), "utf8");
+const monorepoRoot = resolve(pluginDir, "..");
+const inMonorepo = existsSync(resolve(monorepoRoot, "intent/app/supabase/functions/mcp/tools.ts"));
+const read = (path) =>
+  path.startsWith("plugin/")
+    ? readFileSync(resolve(pluginDir, path.slice("plugin/".length)), "utf8")
+    : readFileSync(resolve(monorepoRoot, path), "utf8");
 const json = (path) => JSON.parse(read(path));
 
 const manifest = json("plugin/.claude-plugin/plugin.json");
 const marketplace = json("plugin/.claude-plugin/marketplace.json");
 const readiness = json("plugin/submission/readiness.json");
 const chatgptSubmission = json("plugin/submission/chatgpt-app-submission.json");
-const originHandoff = read("handoffs/MCP_ORIGIN_DEPLOY_2026-07-19.md");
-const toolsSource = read("intent/app/supabase/functions/mcp/tools.ts");
-const keyPolicy = read("intent/app/supabase/functions/_shared/api-key-policy.ts");
-const keyMigration = read("intent/app/supabase/migrations/20260719010000_scoped_api_keys.sql");
-const mcpAuth = read("intent/app/supabase/functions/mcp/db.ts");
-const mcpToolAnnotations = read("intent/app/supabase/functions/mcp/tool-annotations.ts");
-const mcpIndex = read("intent/app/supabase/functions/mcp/index.ts");
-const gatewayAuth = read("intent/app/supabase/functions/chat-completions/index.ts");
-const apiPage = read("api/index.html");
-const scopedLiveCheck = read("intent/app/supabase/tests/scoped-api-key-live-check.mjs");
-const migrationSetup = read("intent/app/supabase/tests/scoped-api-key-migration-setup.sql");
-const migrationAssertions = read("intent/app/supabase/tests/scoped-api-key-migration-assert.sql");
 const openai = read("plugin/submission/OPENAI.md");
 const pluginDocs = ["plugin/README.md", "plugin/SETUP.md", "plugin/PRIVACY.md", "plugin/CHANGELOG.md"]
   .map(read)
   .join("\n");
-const privacy = read("privacy.html");
-const terms = read("terms.html");
 
 assert.equal(manifest.name, "phewsh");
 assert.equal(manifest.version, marketplace.version);
@@ -42,7 +36,7 @@ assert.equal(marketplace.plugins[0].name, "phewsh");
 const skills = ["resume-project", "plan-with-context", "finish-session", "create-handoff", "reconcile"];
 for (const skill of skills) read(`plugin/skills/${skill}/SKILL.md`);
 assert.deepEqual(
-  readdirSync(resolve(root, "plugin/skills"), { withFileTypes: true })
+  readdirSync(resolve(pluginDir, "skills"), { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .sort(),
@@ -57,21 +51,9 @@ const expectedTools = [
   "phewsh_record_decision",
   "phewsh_create_handoff",
 ];
-assert.deepEqual(
-  [...toolsSource.matchAll(/^\s{2}(phewsh_[a-z_]+): \{/gm)].map((match) => match[1]),
-  expectedTools,
-  "submission packet must enumerate the exact tool set",
-);
 for (const tool of expectedTools) {
-  assert.match(toolsSource, new RegExp(`\\b${tool}\\b`), `missing MCP tool ${tool}`);
   assert.ok(openai.includes(`\`${tool}\``), `missing submission copy for ${tool}`);
 }
-const toolBlock = (name, next) => {
-  const start = toolsSource.indexOf(`  ${name}: {`);
-  const end = next ? toolsSource.indexOf(`  ${next}: {`, start) : toolsSource.indexOf("\n};", start);
-  assert.ok(start >= 0 && end > start, `could not isolate ${name}`);
-  return toolsSource.slice(start, end);
-};
 const expectedAnnotations = {
   phewsh_list_projects: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   phewsh_get_active_context: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
@@ -88,14 +70,7 @@ assert.equal(chatgptSubmission.app_info.display_name, "Phewsh");
 assert.ok(chatgptSubmission.app_info.subtitle.length <= 30, "ChatGPT subtitle must be at most 30 characters");
 assert.equal(chatgptSubmission.app_info.category, "DEVELOPER_TOOLS");
 assert.deepEqual(Object.keys(chatgptSubmission.tools), expectedTools);
-for (const [index, tool] of expectedTools.entries()) {
-  const block = toolBlock(tool, expectedTools[index + 1]);
-  assert.match(block, /\btitle: "/, `${tool} is missing a title`);
-  assert.match(block, /\boutputSchema:/, `${tool} is missing an outputSchema`);
-  for (const [hint, value] of Object.entries(expectedAnnotations[tool])) {
-    assert.match(block, new RegExp(`\\b${hint}: ${value}\\b`), `${tool} has wrong ${hint}`);
-  }
-  assert.doesNotMatch(block, /\bidempotentHint\b/, `${tool} must not promise idempotency when the key is optional`);
+for (const tool of expectedTools) {
   const row = openai.match(new RegExp("^\\| `" + tool + "` \\| (true|false) \\| (true|false) \\| (true|false) \\|", "m"));
   assert.ok(row, `missing OpenAI annotation row for ${tool}`);
   assert.deepEqual(
@@ -122,11 +97,6 @@ for (const [index, tool] of expectedTools.entries()) {
     `ChatGPT import justifications are incomplete for ${tool}`,
   );
 }
-assert.doesNotMatch(
-  toolsSource.match(/phewsh_get_changes_since:[\s\S]*?phewsh_record_decision:/)?.[0] || "",
-  /\.select\([^\n]*source_session_id/,
-  "generic change-ledger reads must not return stored session identifiers",
-);
 assert.equal((openai.match(/^### Positive \d/gm) || []).length, 5);
 assert.equal((openai.match(/^### Negative \d/gm) || []).length, 3);
 assert.equal(chatgptSubmission.test_cases.length, 5);
@@ -199,49 +169,98 @@ assert.deepEqual(originEvidence.checks, {
   inspector_bearer_every_tool: "6/6",
   inspector_origin_cors: "8/8",
 });
-for (const value of [
-  originEvidence.source_commit,
-  originEvidence.netlify_site_id,
-  originEvidence.netlify_deploy_id,
-  originEvidence.previous_netlify_deploy_id,
-  originEvidence.url,
-]) {
-  assert.ok(originHandoff.includes(value), `canonical-origin handoff is missing evidence ${value}`);
-}
 
 for (const [name, url] of Object.entries(readiness.public_urls)) {
   assert.match(url, /^https:\/\//, `${name} must be HTTPS`);
 }
-assert.doesNotMatch(privacy, /hello@recipeflower\.com/);
-assert.doesNotMatch(terms, /hello@recipeflower\.com/);
-assert.match(privacy, /claimed provenance/);
-assert.match(terms, /does not grant remote desktop control/);
 assert.match(pluginDocs, /account-wide/i);
 assert.match(pluginDocs, /generation gateway/i);
-assert.match(keyPolicy, /purpose === "legacy_all" \|\| purpose === required/);
-assert.match(keyMigration, /CHECK \(purpose IN \('legacy_all', 'gateway', 'mcp'\)\)/);
-assert.match(keyMigration, /ALTER COLUMN purpose SET DEFAULT 'gateway'/);
-assert.match(keyMigration, /CREATE TRIGGER api_keys_guard_legacy_purpose/);
-assert.match(keyMigration, /CREATE OR REPLACE FUNCTION rotate_scoped_api_key/);
-assert.match(keyMigration, /SECURITY DEFINER/);
-assert.match(mcpAuth, /apiKeyAllows\(keyRow, "mcp"\)/);
-assert.match(mcpAuth, /authKind: "api_key"/);
-assert.match(mcpAuth, /authKind: "supabase_jwt"/);
-assert.match(mcpToolAnnotations, /authKind === "api_key" && annotations\.readOnlyHint/);
-assert.match(mcpIndex, /toolList\(principal\.authKind\)/);
-assert.match(toolsSource, /outputSchema: def\.outputSchema/, "tools/list must expose each tool outputSchema");
 assert.match(openai, /OAuth\/JWT submission path/);
-assert.match(gatewayAuth, /apiKeyAllows\(keyRow, "gateway"\)/);
-assert.match(apiPage, /Phewsh MCP Connector Key/);
-assert.match(apiPage, /purpose: 'mcp'/);
-assert.match(apiPage, /rpc\/rotate_scoped_api_key/);
-assert.match(scopedLiveCheck, /MCP-only key is rejected before paid generation parsing/);
-assert.match(migrationSetup, /Represents a real key that predates scoped credentials/);
-assert.match(migrationAssertions, /PASS scoped API-key migration SQL/);
 assert.doesNotMatch(pluginDocs, /which tool\/model/i);
 assert.doesNotMatch(pluginDocs, /OAuth 2\.1 \+ dynamic client registration is next/i);
+
+// ── Monorepo-backed checks: server source, site pages, deploy handoffs ──
+if (inMonorepo) {
+  const toolsSource = read("intent/app/supabase/functions/mcp/tools.ts");
+  const keyPolicy = read("intent/app/supabase/functions/_shared/api-key-policy.ts");
+  const keyMigration = read("intent/app/supabase/migrations/20260719010000_scoped_api_keys.sql");
+  const mcpAuth = read("intent/app/supabase/functions/mcp/db.ts");
+  const mcpToolAnnotations = read("intent/app/supabase/functions/mcp/tool-annotations.ts");
+  const mcpIndex = read("intent/app/supabase/functions/mcp/index.ts");
+  const gatewayAuth = read("intent/app/supabase/functions/chat-completions/index.ts");
+  const apiPage = read("api/index.html");
+  const scopedLiveCheck = read("intent/app/supabase/tests/scoped-api-key-live-check.mjs");
+  const migrationSetup = read("intent/app/supabase/tests/scoped-api-key-migration-setup.sql");
+  const migrationAssertions = read("intent/app/supabase/tests/scoped-api-key-migration-assert.sql");
+  const originHandoff = read("handoffs/MCP_ORIGIN_DEPLOY_2026-07-19.md");
+  const privacy = read("privacy.html");
+  const terms = read("terms.html");
+
+  assert.deepEqual(
+    [...toolsSource.matchAll(/^\s{2}(phewsh_[a-z_]+): \{/gm)].map((match) => match[1]),
+    expectedTools,
+    "submission packet must enumerate the exact tool set",
+  );
+  const toolBlock = (name, next) => {
+    const start = toolsSource.indexOf(`  ${name}: {`);
+    const end = next ? toolsSource.indexOf(`  ${next}: {`, start) : toolsSource.indexOf("\n};", start);
+    assert.ok(start >= 0 && end > start, `could not isolate ${name}`);
+    return toolsSource.slice(start, end);
+  };
+  for (const [index, tool] of expectedTools.entries()) {
+    const block = toolBlock(tool, expectedTools[index + 1]);
+    assert.match(block, /\btitle: "/, `${tool} is missing a title`);
+    assert.match(block, /\boutputSchema:/, `${tool} is missing an outputSchema`);
+    for (const [hint, value] of Object.entries(expectedAnnotations[tool])) {
+      assert.match(block, new RegExp(`\\b${hint}: ${value}\\b`), `${tool} has wrong ${hint}`);
+    }
+    assert.doesNotMatch(block, /\bidempotentHint\b/, `${tool} must not promise idempotency when the key is optional`);
+  }
+  assert.doesNotMatch(
+    toolsSource.match(/phewsh_get_changes_since:[\s\S]*?phewsh_record_decision:/)?.[0] || "",
+    /\.select\([^\n]*source_session_id/,
+    "generic change-ledger reads must not return stored session identifiers",
+  );
+  for (const value of [
+    originEvidence.source_commit,
+    originEvidence.netlify_site_id,
+    originEvidence.netlify_deploy_id,
+    originEvidence.previous_netlify_deploy_id,
+    originEvidence.url,
+  ]) {
+    assert.ok(originHandoff.includes(value), `canonical-origin handoff is missing evidence ${value}`);
+  }
+  assert.doesNotMatch(privacy, /hello@recipeflower\.com/);
+  assert.doesNotMatch(terms, /hello@recipeflower\.com/);
+  assert.match(privacy, /claimed provenance/);
+  assert.match(terms, /does not grant remote desktop control/);
+  assert.match(keyPolicy, /purpose === "legacy_all" \|\| purpose === required/);
+  assert.match(keyMigration, /CHECK \(purpose IN \('legacy_all', 'gateway', 'mcp'\)\)/);
+  assert.match(keyMigration, /ALTER COLUMN purpose SET DEFAULT 'gateway'/);
+  assert.match(keyMigration, /CREATE TRIGGER api_keys_guard_legacy_purpose/);
+  assert.match(keyMigration, /CREATE OR REPLACE FUNCTION rotate_scoped_api_key/);
+  assert.match(keyMigration, /SECURITY DEFINER/);
+  assert.match(mcpAuth, /apiKeyAllows\(keyRow, "mcp"\)/);
+  assert.match(mcpAuth, /authKind: "api_key"/);
+  assert.match(mcpAuth, /authKind: "supabase_jwt"/);
+  assert.match(mcpToolAnnotations, /authKind === "api_key" && annotations\.readOnlyHint/);
+  assert.match(mcpIndex, /toolList\(principal\.authKind\)/);
+  assert.match(toolsSource, /outputSchema: def\.outputSchema/, "tools/list must expose each tool outputSchema");
+  assert.match(gatewayAuth, /apiKeyAllows\(keyRow, "gateway"\)/);
+  assert.match(apiPage, /Phewsh MCP Connector Key/);
+  assert.match(apiPage, /purpose: 'mcp'/);
+  assert.match(apiPage, /rpc\/rotate_scoped_api_key/);
+  assert.match(scopedLiveCheck, /MCP-only key is rejected before paid generation parsing/);
+  assert.match(migrationSetup, /Represents a real key that predates scoped credentials/);
+  assert.match(migrationAssertions, /PASS scoped API-key migration SQL/);
+}
 
 console.log("PASS plugin submission packet");
 console.log(`PASS ${skills.length} skills · ${expectedTools.length} tools · 5 positive + 3 negative tests`);
 console.log("PASS all 5 tools declare outputSchema for successful structured results");
 console.log("PASS unresolved production and human gates remain explicit");
+console.log(
+  inMonorepo
+    ? "PASS monorepo server-source cross-checks"
+    : "SKIP monorepo server-source cross-checks (standalone mirror — run from the monorepo for full validation)",
+);
