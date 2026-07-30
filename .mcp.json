@@ -2,7 +2,7 @@
   "mcpServers": {
     "phewsh": {
       "type": "http",
-      "url": "https://fpnpfnahwaztdlxuayyv.supabase.co/functions/v1/mcp",
+      "url": "https://mcp.phewsh.com/",
       "headers": {
         "Authorization": "Bearer ${user_config.api_key}"
       }

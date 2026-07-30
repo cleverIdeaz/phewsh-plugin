@@ -33,7 +33,7 @@ assert.equal(manifest.userConfig.api_key.sensitive, true);
 assert.equal(marketplace.plugins.length, 1);
 assert.equal(marketplace.plugins[0].name, "phewsh");
 
-const skills = ["resume-project", "plan-with-context", "finish-session", "create-handoff", "reconcile"];
+const skills = ["resume-project", "plan-with-context", "finish-session", "create-handoff", "reconcile", "realtime"];
 for (const skill of skills) read(`plugin/skills/${skill}/SKILL.md`);
 assert.deepEqual(
   readdirSync(resolve(pluginDir, "skills"), { withFileTypes: true })

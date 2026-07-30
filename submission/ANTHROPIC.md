@@ -14,9 +14,16 @@ Connectors Directory. Do not describe one approval as approval of the other.
 - **License:** MIT
 - **Validation:** run `claude plugin validate --strict plugin` on the final synced tree,
   then install from the public repository and exercise all five skills/tools.
-- **External gate:** the public 0.1.1 package is synced. Confirm the eligible Claude
-  organization/Console role, complete current security/attestation requirements, and
-  submit the immutable public release through the provider portal.
+- **External gate:** the public 0.1.1 package is synced. **No Team/Enterprise organization
+  is required for this submission.** Anthropic's plugin docs state that individual authors
+  outside a claude.ai Team/Enterprise org can sign up for Console at `platform.claude.com`
+  and submit at `https://platform.claude.com/plugins/submit` with a Developer, Admin or
+  Owner role. (The claude.ai portal at `/admin-settings/directory/submissions/plugins/new`
+  is the org-only alternative.) Verified against the live docs 2026-07-30.
+- **Blocking prerequisite:** `plugin/.mcp.json` must point at `https://mcp.phewsh.com/`,
+  not the raw `*.supabase.co` function URL — review criteria require the MCP server domain
+  to match the service. Fixed in the monorepo 2026-07-30; **must be mirrored to the public
+  repo**, since Anthropic reads GitHub, not this tree.
 
 ## Connectors Directory listing
 
@@ -86,9 +93,12 @@ replace this with static unit-test evidence.
 
 ## Human portal gates
 
-- Team/Enterprise organization and directory-management permission;
+- **Connectors Directory only:** Team/Enterprise organization and directory-management
+  permission. The **Plugin Directory does not require this** — use the Console path above.
 - browser OAuth, provider-Origin/audience acceptance, Claude custom-connector proof, and a
-  populated reviewer account;
+  populated reviewer account. **Reviewer account populated and verified 2026-07-30** —
+  rebuild any time with `plugin/submission/seed-reviewer-fixture.mjs` (idempotent; seeds
+  exactly one project, `Phewsh Reviewer Demo`, and re-verifies all five test cases);
 - final slug, categories, review contact, owned-domain/API declarations, and all current
   policy acknowledgments;
 - portal submission and response to provider review.

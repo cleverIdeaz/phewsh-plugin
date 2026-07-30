@@ -85,6 +85,7 @@ available on every tier).
 | `finish-session` | wrapping up, before `/exit` | record_decision + create_handoff |
 | `create-handoff` | "write a handoff", switching tools | create_handoff |
 | `reconcile` | cloud disagrees with the repo | get_active_context + record_decision (supersedes) |
+| `realtime` | "open the room", "who's here", "tune the room" | list_projects (the room *is* the project) |
 
 The MCP server exposes five tools: `phewsh_list_projects`,
 `phewsh_get_active_context`, `phewsh_get_changes_since`, `phewsh_record_decision`,
