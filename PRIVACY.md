@@ -29,7 +29,7 @@ use their own host's credential store.
 
 ## What data moves, and where
 When a skill calls an MCP tool, the request goes to
-`https://<project>.supabase.co/functions/v1/mcp` and may include:
+`https://mcp.phewsh.com/` — the endpoint this plugin's `.mcp.json` ships — and may include:
 - the **project id** you're working in,
 - **decision text** and **handoff summaries** you (or the AI, on your instruction) choose
   to record,
